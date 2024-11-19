@@ -7,8 +7,15 @@ PREREQ
 
 For this test I created 3 vm's on ProxmoxVE.
 
-one for dhcp/web server, and two for test subjects (proxmoxve auto install)
+one for dhcp/web server, and two for test subjects (ProxmoxVE nodes auto install)
 
+I noted the mac addresses of the node machines: 
+
+pveauto1 b6:84:63:f0:37:5d
+
+pveauto2 ea:20:fe:06:2f:41
+
+All machines for simplicity inside same subnet/vlan
 
 
 <h1>ISO generation</h1>
