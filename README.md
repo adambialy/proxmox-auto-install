@@ -2,22 +2,71 @@
 description how to use pve auto install
 
 
-install packages
+PKG | install packages
 ----------------
 
 `apt install apache2 isc-dhcp-server -y`
 
 
-create cert for apache2
+SSL | create cert for apache2
 -----------------------
+
+Enable ssl module and enable ssl site
+
+`a2enmod ssl`
+
+`a2ensite default-ssl`
+
+generate ssl cert/key
 
 `openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes -subj "/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=172.19.3.168"`
 
-install cert and restart apache2
+copy cert and key:
+
+`cp cert.pem /etc/ssl/certs/`
+`cp key.pem /etc/ssl/private/`
+
+install cert:
 
 
-copy answer.toml to apache root dir for testing.
+/etc/apache2/sites-enabled/default-ssl.conf
 
+```
+<VirtualHost *:443>
+
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/html
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+	SSLEngine on
+	SSLCertificateFile      /etc/ssl/certs/cert.pem
+	SSLCertificateKeyFile   /etc/ssl/private/key.pem
+
+
+	<FilesMatch "\.(?:cgi|shtml|phtml|php)$">
+		SSLOptions +StdEnvVars
+	</FilesMatch>
+	<Directory /usr/lib/cgi-bin>
+		SSLOptions +StdEnvVars
+	</Directory>
+	<Directory "/var/www/html">
+	    Options Indexes MultiViews
+	    AllowOverride None
+	    Require all granted
+	</Directory>
+
+</VirtualHost>
+
+```
+
+restart apache
+
+`systemctl restart apache2`
+
+
+
+copy answer.toml to apache root dir for testing (later on dhcp can return different url for different mac addresses)
 
 
 
@@ -50,6 +99,7 @@ disk_list = ["sda"]
 
 ```
 
+[ answer.toml documentation | https://pve.proxmox.com/wiki/Automated_Installation#Answer_File_Format_2]
 
 
   dhcpd.conf
@@ -88,4 +138,6 @@ host pveauto2 {
 }
 ```
 
+restart dhcp server
 
+`systemctl restart isc-dhcp-server.service`
