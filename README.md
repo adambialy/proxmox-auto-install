@@ -1,5 +1,13 @@
 # proxmox-auto-install
-description how to use pve auto install
+Description how to use pve auto install, as informations on proxmox website not entirely clear.
+
+TODO
+----
+
+PXEboot for PVE, and then follow aut install
+
+https://github.com/morph027/pve-iso-2-pxe
+
 
 
 PREREQ
