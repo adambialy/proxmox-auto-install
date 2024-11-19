@@ -190,7 +190,7 @@ host pveauto2 {
 }
 ```
 
-* NOTE: There are mistakes in documentation with certificate fingerprint and url. 1. URL needs to be specified with full path to anwer file. 2. Certificate fingerprint required in sha254, string without ":"
+  > NOTE: There are mistakes in documentation with certificate fingerprint and url. 1. URL needs to be specified with full path to anwer file. 2. Certificate fingerprint required in sha254, string without ":"
 
 restart dhcp server
 
