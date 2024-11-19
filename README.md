@@ -11,9 +11,9 @@ one for dhcp/web server, and two for test subjects (ProxmoxVE nodes auto install
 
 I noted the mac addresses of the node machines: 
 
-pveauto1 b6:84:63:f0:37:5d
+`pveauto1 b6:84:63:f0:37:5d`
 
-pveauto2 ea:20:fe:06:2f:41
+`pveauto2 ea:20:fe:06:2f:41`
 
 All machines for simplicity inside same subnet/vlan
 
@@ -22,7 +22,7 @@ All machines for simplicity inside same subnet/vlan
 
 Download latest iso from Proxmox website.
 
-create iso with autoanswer provided by http request:
+Create iso with autoanswer provided by http request:
 
 `proxmox-auto-install-assistant prepare-iso /mnt/pve/pnfs/template/iso/proxmox-ve_8.2-2-auto-from-iso.iso --fetch-from http`
 
@@ -50,7 +50,15 @@ generate ssl cert/key
 copy cert and key:
 
 `cp cert.pem /etc/ssl/certs/`
+
 `cp key.pem /etc/ssl/private/`
+
+Grab sha256 fingerprint from certificate (will be needed in dhcp config later)
+
+`openssl x509 -in cert.pem -fingerprint -sha256 -noout | tr -d ":"
+sha256 Fingerprint=8C3558AEF51C4EDE20442C1EBA447724EAC28C5050724E8E2BE56892F481E90A`
+
+
 
 install cert:
 
@@ -91,12 +99,15 @@ restart apache
 `systemctl restart apache2`
 
 
+copy answer.toml to different directories for different hosts:
 
-copy answer.toml to apache root dir for testing (later on dhcp can return different url for different mac addresses)
+`cp answer.toml /var/www/html/b68463f0375d/`
+
+`cp answer.toml /var/www/html/ea20fe062f41/`
 
 
 
-  answer.toml
+Example answer.toml below. Obviously at least ip (network/cidr) need to be changed, as well as host name (global/fqdn). All depend of your config.
 
 ```
 [global]
@@ -125,7 +136,7 @@ disk_list = ["sda"]
 
 ```
 
-[ answer.toml documentation | https://pve.proxmox.com/wiki/Automated_Installation#Answer_File_Format_2]
+answer.toml documentation | https://pve.proxmox.com/wiki/Automated_Installation#Answer_File_Format_2
 
 
   dhcpd.conf
@@ -163,6 +174,8 @@ host pveauto2 {
   option pve-auto-url "https://172.19.3.168/ea20fe062f41/answer.toml";
 }
 ```
+
+NOTE: there are mistakes in documentation with certificate fingerprint and url. URL needs to be specified with full path to anwer file. Certificate fingerprint required in sha254, string without ":" 
 
 restart dhcp server
 
