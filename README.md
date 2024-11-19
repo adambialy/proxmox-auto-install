@@ -3,20 +3,22 @@ description how to use pve auto install
 
 
 install packages
+----------------
 
-
-apt install apache2 isc-dhcp-server -y
+  apt install apache2 isc-dhcp-server -y
 
 
 create cert for apache2
+-----------------------
 
-   openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes -subj "/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=172.19.3.168"
+  openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes -subj "/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=172.19.3.168"
 
 install cert and restar apache2
 
 copy answer.toml to apache root dir:
 
-answer.toml
+
+  answer.toml
 
 ```
 [global]
@@ -47,7 +49,7 @@ disk_list = ["sda"]
 
 
 
-dhcpd.conf
+  dhcpd.conf
 
 ```
 option domain-name-servers 1.1.1.1, 8.8.8.8;
