@@ -26,7 +26,8 @@ I noted the mac addresses of the node machines:
 All machines for simplicity inside same subnet/vlan
 
 
-<h1>ISO generation</h1>
+ISO generation
+--------------
 
 Download latest iso from Proxmox website.
 
@@ -37,7 +38,7 @@ Create iso with autoanswer provided by http request:
 
 
 PKG | install packages
-----------------
+----------------------
 
 `apt install apache2 isc-dhcp-server -y`
 
@@ -147,6 +148,11 @@ disk_list = ["sda"]
 answer.toml documentation | https://pve.proxmox.com/wiki/Automated_Installation#Answer_File_Format_2
 
 
+DHCP
+----
+
+
+
   dhcpd.conf
 
 ```
@@ -163,7 +169,8 @@ subnet 172.19.3.128 netmask 255.255.255.128 {
   range 172.19.3.130 172.19.3.150;
   option domain-name-servers 1.1.1.1;
   option routers 172.19.3.254;
-#  option pve-auto-url "https://172.19.3.168/answer.toml";
+# disabled general answer file
+# option pve-auto-url "https://172.19.3.168/answer.toml";
   option pve-auto-url-fp "8c3558aef51c4ede20442c1eba447724eac28c5050724e8e2be56892f481e90a";
   option broadcast-address 172.19.3.255;
   default-lease-time 450;
@@ -183,7 +190,7 @@ host pveauto2 {
 }
 ```
 
-NOTE: there are mistakes in documentation with certificate fingerprint and url. URL needs to be specified with full path to anwer file. Certificate fingerprint required in sha254, string without ":" 
+*NOTE:* There are mistakes in documentation with certificate fingerprint and url. 1. URL needs to be specified with full path to anwer file. 2. Certificate fingerprint required in sha254, string without ":" 
 
 restart dhcp server
 
