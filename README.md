@@ -2,6 +2,25 @@
 description how to use pve auto install
 
 
+PREREQ
+------
+
+For this test I created 3 vm's on ProxmoxVE.
+
+one for dhcp/web server, and two for test subjects (proxmoxve auto install)
+
+
+
+<h1>ISO generation</h1>
+
+Download latest iso from Proxmox website.
+
+create iso with autoanswer provided by http request:
+
+`proxmox-auto-install-assistant prepare-iso /mnt/pve/pnfs/template/iso/proxmox-ve_8.2-2-auto-from-iso.iso --fetch-from http`
+
+
+
 PKG | install packages
 ----------------
 
