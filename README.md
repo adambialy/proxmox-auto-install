@@ -15,7 +15,9 @@ PREREQ
 
 For this test I created 3 vm's on ProxmoxVE.
 
-one for dhcp/web server, and two for test subjects (ProxmoxVE nodes auto install)
+1. One for dhcp/web server.
+
+2. Two for test subjects (ProxmoxVE nodes auto install)
 
 I noted the mac addresses of the node machines: 
 
@@ -33,14 +35,49 @@ Download latest iso from Proxmox website.
 
 Create iso with autoanswer provided by http request:
 
-`proxmox-auto-install-assistant prepare-iso /mnt/pve/pnfs/template/iso/proxmox-ve_8.2-2-auto-from-iso.iso --fetch-from http`
+`proxmox-auto-install-assistant prepare-iso /root/proxmox-ve_8.2-2.iso --fetch-from http`
+
+``
+Copying source ISO to temporary location...
+Preparing ISO...
+Moving prepared ISO to target location...
+Final ISO is available at "/root/proxmox-ve_8.2-2-auto-from-http.iso"
+``
 
 
 
 PKG | install packages
 ----------------------
 
+Install dhcp server and web server
+
 `apt install apache2 isc-dhcp-server -y`
+
+---
+
+Install proxmox tools:
+
+create /etc/apt/sources.list.d/proxmox.list with content below
+
+``deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription``
+
+add key to apt:
+
+``wget https://enterprise.proxmox.com/debian/proxmox-release-bookworm.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg``
+
+`apt update`
+
+Install proxmox auto install package
+
+`apt install proxmox-auto-install-assistant -y`
+
+Install ansible (optional)
+
+`apt install ansible -y`
+
+Install packages required for pxe boot manipulation
+
+`apt install cpio file zstd gzip genisoimage -y`
 
 
 SSL | create cert for apache2
@@ -151,9 +188,35 @@ answer.toml documentation | https://pve.proxmox.com/wiki/Automated_Installation#
 DHCP
 ----
 
+Make sure interface is specified in defaults
 
+`/etc/default/isc-dhcp-server`
 
-  dhcpd.conf
+```
+# Defaults for isc-dhcp-server (sourced by /etc/init.d/isc-dhcp-server)
+
+# Path to dhcpd's config file (default: /etc/dhcp/dhcpd.conf).
+#DHCPDv4_CONF=/etc/dhcp/dhcpd.conf
+#DHCPDv6_CONF=/etc/dhcp/dhcpd6.conf
+
+# Path to dhcpd's PID file (default: /var/run/dhcpd.pid).
+#DHCPDv4_PID=/var/run/dhcpd.pid
+#DHCPDv6_PID=/var/run/dhcpd6.pid
+
+# Additional options to start dhcpd with.
+#	Don't use options -cf or -pf here; use DHCPD_CONF/ DHCPD_PID instead
+#OPTIONS=""
+
+# On what interfaces should the DHCP server (dhcpd) serve DHCP requests?
+#	Separate multiple interfaces with spaces, e.g. "eth0 eth1".
+INTERFACESv4="ens18"
+INTERFACESv6=""
+```
+
+Edit dhc conf to your needs
+
+`/etc/dhcp/dhcpd.conf`
+
 
 ```
 option domain-name-servers 1.1.1.1, 8.8.8.8;
@@ -175,6 +238,7 @@ subnet 172.19.3.128 netmask 255.255.255.128 {
   option broadcast-address 172.19.3.255;
   default-lease-time 450;
   max-lease-time 600;
+  filename "pxelinux.0";
 }
 
 host pveauto1 {
@@ -195,3 +259,36 @@ host pveauto2 {
 restart dhcp server
 
 `systemctl restart isc-dhcp-server.service`
+
+PXE boot
+========
+
+```
+./pve-iso-2-pxe.sh /root/proxmox-ve_8.2-2-auto-from-http.iso 
+
+#########################################################################################################
+# Create PXE bootable Proxmox image including ISO                                                       #
+#                                                                                                       #
+# Author: mrballcb @ Proxmox Forum (06-12-2012)                                                         #
+# Thread: http://forum.proxmox.com/threads/8484-Proxmox-installation-via-PXE-solution?p=55985#post55985 #
+# Modified: morph027 @ Proxmox Forum (23-02-2015) to work with 3.4                                      #
+#########################################################################################################
+
+Using proxmox-ve_8.2-2-auto-from-http.iso...
+Using proxmox-ve_8.2-2.iso...
+ln: failed to create symbolic link 'proxmox.iso': File exists
+extracting kernel...
+extracting initrd...
+adding iso file ...
+2728961 blocks
+Finished! pxeboot files can be found in /root.
+```
+
+
+
+Links
+
+https://serverfault.com/questions/1148217/debian-12-bookworm-from-ipxe
+
+
+
