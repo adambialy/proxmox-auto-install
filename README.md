@@ -1,10 +1,22 @@
 # proxmox-auto-install
 Description how to use pve auto install, as informations on proxmox website not entirely clear.
 
-TODO
-----
+OBJECTIVE
+---------
 
-PXEboot for PVE, and then follow aut install
+Central server allowing bare metal to pxeboot proxmox image, with baked http autoinstall.
+One server will have all necessary services running - apache2, dhcp, tftp, ansible.
+In essence, bare metal pve node is booting up from pxe, downloading configuration (answer file) from http based on mac address.
+Inside answer file will be generic setup with networking, stroage, ssh key (for ansible) etc.
+Once server started, ansible will provide rest of the configuration - configure network bonds etc, install tools and packages ssh keys etc.
+After these steps the node will be ready to join the cluster. (theory)
+
+
+
+(still) TODO
+------------
+
+PXEboot for PVE
 
 https://github.com/morph027/pve-iso-2-pxe
 
@@ -286,9 +298,11 @@ Finished! pxeboot files can be found in /root.
 
 
 
-Links
+<h1>Links</h1>
 
 https://serverfault.com/questions/1148217/debian-12-bookworm-from-ipxe
+
+https://forum.proxmox.com/threads/proxmox-installation-via-pxe-solution.8484/#post-55985
 
 
 
