@@ -275,6 +275,14 @@ restart dhcp server
 PXE boot
 ========
 
+prepre iso for http autoinstall:
+
+```
+proxmox-auto-install-assistant prepare-iso proxmox-ve_8.2.2.iso --fetch-from http
+```
+
+extract initrd and kernel using script pve-iso-2-pxe:
+
 ```
 ./pve-iso-2-pxe.sh /root/proxmox-ve_8.2-2-auto-from-http.iso 
 
@@ -295,8 +303,40 @@ adding iso file ...
 2728961 blocks
 Finished! pxeboot files can be found in /root.
 ```
+create dir /srv/tftp/proxmox/
+
+copy inside initrd and linux26 from direcotry pxeboot/ created with command above
 
 
+configure pxe
+
+```
+cp /usr/lib/PXELINUX/pxelinux.0 /srv/tftp/
+```
+
+create file /srv/tftp/pxelinux.cfg/default 
+```
+DEFAULT menu.c32
+PROMPT 0
+TIMEOUT 50
+ONTIMEOUT proxmox
+
+MENU TITLE PXE Boot Menu
+
+LABEL proxmox
+     menu label Install Proxmox
+     linux proxmox/linux26
+     append vga=791 video=vesafb:ywrap,mtrr ramdisk_size=16777216 rw quiet splash=silent proxmox-start-auto-installer
+     initrd proxmox/initrd
+```
+
+restart dhcp and tftp server
+
+```
+systemctl restart tftpd-hpa.service isc-dhcp-server.service
+```
+
+and try booting from pxe.
 
 <h1>Links</h1>
 
