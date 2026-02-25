@@ -324,11 +324,19 @@ adding iso file ...
 2728961 blocks
 Finished! pxeboot files can be found in /root.
 ```
-create dir /srv/tftp/proxmox/
+
+create dir /srv/tftp/proxmox
+
+```
+mkdir /srv/tftp/proxmox
+```
 
 copy inside initrd and linux26 from direcotry pxeboot/ created with command above
 
+```cp pxeboot/* /srv/tftp/proxmox/```
+
 restart tftp:
+
 ```
 systemctl restart tftpd-hpa.service
 ```
