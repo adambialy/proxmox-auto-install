@@ -1,22 +1,19 @@
 # proxmox-auto-install
-Description how to use pve auto install, as informations on proxmox website not entirely clear.
+Description how to create autoinstall server for proxmox ve nodes. 
 
 OBJECTIVE
 ---------
 
-Central server allowing bare metal to pxeboot proxmox image, with baked http autoinstall.
-One server will have all necessary services running - apache2, dhcp, tftp, ansible.
-In essence, bare metal pve node is booting up from pxe, downloading configuration (answer file) from http based on mac address.
+Central server allowing provisioning bare metal proxmox hypervisors. 
+The server will use pxeboot proxmox image (tftp) with http autoinstall, isc-dhcp to give all necessary imformation for boot, apache2 - serving autoinstall toml files.
+In essence, bare metal pve node is booting up from pxe using tftp to pull image/kernel, then downloading configuration (answer file) from http (apache2) based on mac address.
 Inside answer file will be generic setup with networking, stroage, ssh key (for ansible) etc.
-Once server started, ansible will provide rest of the configuration - configure network bonds etc, install tools and packages ssh keys etc.
+Once server started, ansible will provide rest of the configuration (TODO) - configure network bonds etc, install tools and packages ssh keys etc.
 After these steps the node will be ready to join the cluster. (theory)
-
 
 
 (still) TODO
 ------------
-
-PXEboot for PVE
 
 https://github.com/morph027/pve-iso-2-pxe
 
@@ -275,6 +272,30 @@ restart dhcp server
 PXE boot
 ========
 
+Prepare tftp
+
+```
+cp /usr/lib/PXELINUX/pxelinux.0 /srv/tftp/
+cp /usr/lib/syslinux/modules/bios/* /srv/tftp/
+```
+
+create file /srv/tftp/pxelinux.cfg/default 
+```
+DEFAULT menu.c32
+PROMPT 0
+TIMEOUT 50
+ONTIMEOUT proxmox
+
+MENU TITLE PXE Boot Menu
+
+LABEL proxmox
+     menu label Install Proxmox
+     linux proxmox/linux26
+     append vga=791 video=vesafb:ywrap,mtrr ramdisk_size=16777216 rw quiet splash=silent proxmox-start-auto-installer
+     initrd proxmox/initrd
+```
+
+
 prepre iso for http autoinstall:
 
 ```
@@ -307,33 +328,9 @@ create dir /srv/tftp/proxmox/
 
 copy inside initrd and linux26 from direcotry pxeboot/ created with command above
 
-
-configure pxe
-
+restart tftp:
 ```
-cp /usr/lib/PXELINUX/pxelinux.0 /srv/tftp/
-```
-
-create file /srv/tftp/pxelinux.cfg/default 
-```
-DEFAULT menu.c32
-PROMPT 0
-TIMEOUT 50
-ONTIMEOUT proxmox
-
-MENU TITLE PXE Boot Menu
-
-LABEL proxmox
-     menu label Install Proxmox
-     linux proxmox/linux26
-     append vga=791 video=vesafb:ywrap,mtrr ramdisk_size=16777216 rw quiet splash=silent proxmox-start-auto-installer
-     initrd proxmox/initrd
-```
-
-restart dhcp and tftp server
-
-```
-systemctl restart tftpd-hpa.service isc-dhcp-server.service
+systemctl restart tftpd-hpa.service
 ```
 
 and try booting from pxe.
