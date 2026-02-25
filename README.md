@@ -333,7 +333,9 @@ mkdir /srv/tftp/proxmox
 
 copy inside initrd and linux26 from direcotry pxeboot/ created with command above
 
-```cp pxeboot/* /srv/tftp/proxmox/```
+```
+cp pxeboot/* /srv/tftp/proxmox/
+```
 
 restart tftp:
 
